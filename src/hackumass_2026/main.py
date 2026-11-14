@@ -8,6 +8,8 @@ from tools.shell import shell
 
 app = fastapi.FastAPI()
 
+# TODO: figure out how the hell to connect this up to the pi
+
 @app.post("/")
 async def handle_request(request: pjrpc.Request) -> pjrpc.Response:
     match request.method:
@@ -38,4 +40,4 @@ async def handle_request(request: pjrpc.Request) -> pjrpc.Response:
         return pjrpc.Response(id=request.id, error=UnknownError())
 
 if __name__ == "__main__":
-    uvicorn.run(app, port=8000)
+    uvicorn.run(app, host="127.0.0.1", port=8000)
