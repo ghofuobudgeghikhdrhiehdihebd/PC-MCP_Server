@@ -9,7 +9,7 @@ class write(baseTool):
 
     async def execute(self, args: dict[str, JsonT]) -> str:
         await super().execute(args)
-        file_path = resolve_to_absolute_path(args["file_path"])
-        with open(file_path, 'w', encoding='utf-8') as file:
+        path = resolve_to_absolute_path(args["path"])
+        with open(path, 'w', encoding='utf-8') as file:
             file.write(args["content"])
-        return f"Successfully wrote {len(args['content'])} characters to {file_path}."
+        return f"Successfully wrote {len(args['content'])} characters to {path}."

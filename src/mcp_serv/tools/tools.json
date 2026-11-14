@@ -2,9 +2,9 @@
     "read": {
         "description": "Reads a file and returns its contents.",
         "params": {
-            "file_path": {
+            "path": {
                 "mandatory": true,
-                "description": "Reads a file and returns its contents."
+                "description": "The path to the file to be read."
             },
             "max_length": {
                 "mandatory": false,
@@ -15,9 +15,9 @@
     "write": {
         "description": "Writes to a file",
         "params": {
-            "file_path": {
+            "path": {
                 "mandatory": true,
-                "description": "The path to the file to be read."
+                "description": "The path to the file to be written to."
             },
             "content": {
                 "mandatory": true,

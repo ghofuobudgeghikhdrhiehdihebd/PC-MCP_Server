@@ -9,7 +9,7 @@ class read(baseTool):
 
     async def execute(self, args: dict[str, JsonT]) -> str:
         await super().execute(args)
-        file_path = resolve_to_absolute_path(args["file_path"])
+        path = resolve_to_absolute_path(args["path"])
         max_length = int(args.get("max_length", 1000))
-        with open(file_path, 'r', encoding='utf-8') as file:
+        with open(path, 'r', encoding='utf-8') as file:
             return file.read()[:max_length]
