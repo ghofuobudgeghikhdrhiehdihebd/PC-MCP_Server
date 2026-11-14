@@ -1,5 +1,5 @@
 [project]
-name = "hackumass-2026"
+name = "mcp_serv"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
@@ -9,12 +9,16 @@ authors = [
 requires-python = ">=3.10"
 dependencies = [
     "fastapi>=0.162.5",
+    "httpx2>=2.14.0",
     "pjrpc>=2.2.0",
+    "pytest>=9.2.0",
+    "pytest-order>=1.5.0",
     "uvicorn>=0.54.0",
 ]
 
 [project.scripts]
-hackumass-2026 = "hackumass_2026:main"
+main = "mcp_serv.main:main"
+test = "mcp_serv.tests:run"
 
 [build-system]
 requires = ["uv_build>=0.12.13,<0.13.0"]

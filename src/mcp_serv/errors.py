@@ -1,4 +1,4 @@
-from pjrpc.common.exceptions import JsonRpcError
+from pjrpc.common.exceptions import JsonRpcError, JsonT
 
 class ToolNotFoundError(JsonRpcError):
     def __init__(self, tool_name: str):
@@ -11,11 +11,11 @@ class BadRequestError(JsonRpcError):
     def __init__(self):
         super().__init__(
             code=-32600,
-            message="Bad request. Requests must be valid JSON-RPC 2.0 requests with a method and optional parameters.",
+            message="Bad request. Requests must be valid JSON-RPC 2.0 requests with all mandatory fields, some (or none) optional fields, and no extra fields.",
         )
 
 class NonexistentFileError(JsonRpcError):
-    def __init__(self, file_path: str):
+    def __init__(self, file_path: JsonT):
         super().__init__(
             code=-32001,
             message=f"File not found: {file_path}",

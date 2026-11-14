@@ -1,0 +1,41 @@
+{
+    "read": {
+        "description": "Reads a file and returns its contents.",
+        "params": {
+            "file_path": {
+                "mandatory": true,
+                "description": "Reads a file and returns its contents."
+            },
+            "max_length": {
+                "mandatory": false,
+                "description": "The maximum number of characters to read (default: 1000)"
+            }
+        }
+    },
+    "write": {
+        "description": "Writes to a file",
+        "params": {
+            "file_path": {
+                "mandatory": true,
+                "description": "The path to the file to be read."
+            },
+            "content": {
+                "mandatory": true,
+                "description": "The content to write to the file."
+            }
+        }
+    },
+    "shell": {
+        "description": "Executes a command and returns its output (if no errors) or error message (if an error occurred)",
+        "params": {
+            "command": {
+                "mandatory": true,
+                "description": "The command to be executed."
+            },
+            "timeout": {
+                "mandatory": false,
+                "description": "The maximum time to wait for the command to complete (default: 30 seconds)"
+            }
+        }
+    }
+}

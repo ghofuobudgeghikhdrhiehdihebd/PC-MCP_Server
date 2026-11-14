@@ -1,17 +1,13 @@
-from tools.base_tool import baseTool
+from pjrpc.common import JsonT
+from .load_tool import load_tool
+from .base_tool import baseTool
 import asyncio
 
 class shell(baseTool):
     def __init__(self):
-        super().__init__(
-            name="execute",
-            description="Executes a command and returns its output.",
-            mandatory_args={"command"},
-            optional_args={"timeout"},
-            arg_descriptions={"command": "The command to be executed.", "timeout": "The maximum time to wait for the command to complete (default: 30 seconds)"},
-        )
+        super().__init__(load_tool("shell"))
 
-    async def execute(self, args: dict[str, str]) -> str:
+    async def execute(self, args: dict[str, JsonT]) -> str:
         await super().execute(args)
         command = args["command"]
         timeout = int(args.get("timeout", 30))
