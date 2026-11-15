@@ -1,37 +1,51 @@
-"""
-Takes USB serial data and translates it into an HTTP request
-Sends request to MCP server and returns response as USB serial data
-"""
-import serial
-import msgpack
-import asyncio
-from dataclasses import asdict
-from .tools.tool_types import *
+import fastapi
+from fastapi import Request, Response
+import uvicorn
+from .tools.read import read
+from .tools.write import write
+from .tools.shell import shell
 
-from .server import handle_request
+app = fastapi.FastAPI()
 
-# If error "no such file exists", run "ls /dev/cu.*" to find the correct port and replace it below
-AIRLOCK = serial.Serial("/dev/cu.usbmodem39326093082", 9600, timeout=10)
-
-def send_serial(data: ToolResultSuccess | ToolResultError) -> None:
-    """
-    Sends data to the USB serial port
-    """
-    out_json = {"type": "tool_result", "data": asdict(data)}
-    AIRLOCK.write(msgpack.packb(out_json))
-
-print("Server is running, listening for incoming data...")
-while True:
-    # Read data from USB serial
-    inp = msgpack.unpackb(AIRLOCK.readline())
-    if not inp:
-        continue
-    if inp["type"] != "tool_call":
-        continue
+@app.post("/")
+async def handle_request(request: Request) -> Response:
+    req_json = await request.json()
+    request_type = req_json.get("type", "")
+    if (request_type != "tool_call"):
+        return Response(
+            content='{"type": "error", "data": {"message": "Invalid request type, must be tool_call"}}',
+            media_type="application/json",
+            status_code=400,
+        )
+    tool_type = req_json.get("tool", "")
+    tool_args = req_json.get("params", {})
+    match tool_type:
+        case "read":
+            tool = read()
+        case "write":
+            tool = write()
+        case "shell":
+            tool = shell()
+        case _:
+            return Response(
+                content='{"type": "error", "data": {"message": "Invalid tool type, must be read, write, or shell"}}',
+                media_type="application/json",
+                status_code=400,
+            )
     try:
-        # Parse the incoming data as an HTTP request
-        output = asyncio.run(handle_request(ToolRequest(**inp["data"])))
-        send_serial(output)
+        tool_response = await tool.execute(tool_args)
+        return Response(
+            content=f'{{"type": "tool_result", "data": {{"message": "success", "result": {tool_response}}}}}',
+            media_type="application/json",
+            status_code=200,
+        )
     except Exception as e:
-        continue # ignore invalid requests
-    # Request must be a valid JSON-RPC request
+        return Response(
+            content=f'{{"type": "error", "data": {{"message": "Error executing tool: {str(e)}"}}}}',
+            media_type="application/json",
+            status_code=500,
+        )
+
+if __name__ == "__main__":
+    # run as UDS, not HTTP
+    uvicorn.run(app, uds="/tmp/mcp_serv.sock")
