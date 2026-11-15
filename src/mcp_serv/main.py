@@ -4,18 +4,21 @@ Sends request to MCP server and returns response as USB serial data
 """
 import serial
 import msgpack
-from pjrpc import Request, Response
+import asyncio
+from dataclasses import asdict
+from .tools.tool_types import *
 
-from .server import app
+from .server import handle_request
 
-# If no data is ever received, check if these ports still work. Could change for no reason.
+# If error "no such file exists", run "ls /dev/cu.*" to find the correct port and replace it below
 AIRLOCK = serial.Serial("/dev/cu.usbmodem39326093082", 9600, timeout=10)
 
-def send_serial(data: Response) -> None:
+def send_serial(data: ToolResultSuccess | ToolResultError) -> None:
     """
     Sends data to the USB serial port
     """
-    AIRLOCK.write(msgpack.packb(data))
+    out_json = {"type": "tool_result", "data": asdict(data)}
+    AIRLOCK.write(msgpack.packb(out_json))
 
 print("Server is running, listening for incoming data...")
 while True:
@@ -23,10 +26,12 @@ while True:
     inp = msgpack.unpackb(AIRLOCK.readline())
     if not inp:
         continue
+    if inp["type"] != "tool_call":
+        continue
     try:
-        request = Request.from_json(inp)
-        output = app.post("/", json=request.to_json())
-        send_serial(Response.from_json(output.json()))
+        # Parse the incoming data as an HTTP request
+        output = asyncio.run(handle_request(ToolRequest(**inp["data"])))
+        send_serial(output)
     except Exception as e:
         continue # ignore invalid requests
     # Request must be a valid JSON-RPC request
